@@ -6,37 +6,10 @@
  */
 
 #include <iostream>
-#include <iomanip>
 #include <vector>
 #include <Eigen/Dense>
 
 #include "kalman.hpp"
-
-// to remove
-//************************************************************************************
-#define COLUMN_WIDTH 20
-
-int random_sign(double probability)
-{
-        int result = 1;
-
-        if( (double) rand() / RAND_MAX < probability )
-        {
-                result *= -1;
-        }
-
-        return result;
-}
-
-// probability -> that the number will be negative
-double random_float(double truth, double range, double probability=0)
-{
-        double result = truth + (double) rand() / RAND_MAX * range * random_sign(0.5);
-        result *= random_sign(probability);
-
-        return result;
-}
-//************************************************************************************
 
 int main(int argc, char* argv[]) {
 
@@ -60,18 +33,15 @@ int main(int argc, char* argv[]) {
   R << 5;
   P << .1, .1, .1, .1, 10000, 10, .1, 10, 100;
 
-/*
   std::cout << "A: \n" << A << std::endl;
   std::cout << "C: \n" << C << std::endl;
   std::cout << "Q: \n" << Q << std::endl;
   std::cout << "R: \n" << R << std::endl;
   std::cout << "P: \n" << P << std::endl;
-*/
 
   // Construct the filter
   KalmanFilter kf(dt,A, C, Q, R, P);
 
-/*
   // List of noisy position measurements (y)
   std::vector<double> measurements = {
       1.04202710058, 1.10726790452, 1.2913511148, 1.48485250951, 1.72825901034,
@@ -84,61 +54,26 @@ int main(int argc, char* argv[]) {
       1.86967808173, 1.18073207847, 1.10729605087, 0.916168349913, 0.678547664519,
       0.562381751596, 0.355468474885, -0.155607486619, -0.287198661013, -0.602973173813
   };
-*/
 
   // Best guess of initial states
   Eigen::VectorXd x0(n);
   double t = 0;
-  x0 << 20, 0, -9.81;
-//  x0 << measurements[0], 0, -9.81;
+  x0 << measurements[0], 0, -9.81;
   kf.init(t, x0);
 
   // Feed measurements into filter, output estimated states
 
-  double initial_position = 20;
-  double velocity = 1;
-
   Eigen::VectorXd y(m);
-
-/*  
-  std::cout << std::setw(COLUMN_WIDTH)
-	    << "Time"
-	    << std::setw(COLUMN_WIDTH)
-	    << "Measurement"
-	    << std::setw(COLUMN_WIDTH)
-	    << "Estimate"
-	    << std::endl;
-*/
-
-  for(double time = 0; time < 20; time += 0.01)
-  {
+  std::cout << "t = " << t << ", " << "x_hat[0]: " << kf.state().transpose() << std::endl;
+  for(int i = 0; i < measurements.size(); i++) {
     t += dt;
-
-    double true_position = initial_position - velocity*time;
-    double measured_position = random_float(true_position, 1, 0.1);
-
-    y << measured_position;
+    y << measurements[i];
     kf.update(y);
-
-/*
-    std::cout << std::setw(COLUMN_WIDTH)
-	      << t
-	      << std::setw(COLUMN_WIDTH)
-
-	      << y.transpose()
-	      << std::setw(COLUMN_WIDTH)
-
-	      << kf.state().transpose()[0]
-	      << std::setw(COLUMN_WIDTH)
-
-	      << y.size()
-	      << std::endl;
-*/
-    std::cout << t
-	      << ","
-	      << y.transpose()
-	      << ","
-	      << kf.state().transpose()[0]
+//    std::cout << "t = " << t << ", " << "y[" << i << "] = " << y.transpose()
+//        << ", x_hat[" << i << "] = " << kf.state().transpose() << std::endl;
+    std::cout << t << "\t"
+	      << y.transpose() << "\t"
+	      << kf.state().transpose() << "\t"
 	      << std::endl;
   }
 
