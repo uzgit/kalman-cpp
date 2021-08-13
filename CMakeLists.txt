@@ -8,3 +8,6 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 set(SOURCE_FILES kalman.cpp kalman-test.cpp)
 add_executable(kalman-test ${SOURCE_FILES})
+
+set(SOURCE_FILES kalman.cpp dt-kalman-test.cpp)
+add_executable(dt-kalman-test ${SOURCE_FILES})

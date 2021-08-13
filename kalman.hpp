@@ -56,6 +56,12 @@ public:
 
   /**
   * Update the estimated state based on measured values,
+  * using the given time step.
+  */
+  void update(const Eigen::VectorXd& y, double dt);
+  
+  /**
+  * Update the estimated state based on measured values,
   * using the given time step and dynamics matrix.
   */
   void update(const Eigen::VectorXd& y, double dt, const Eigen::MatrixXd A);
